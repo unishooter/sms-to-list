@@ -26,13 +26,16 @@ function parseMessage(body) {
     rawItem = text.slice(0, toIndex).trim();
     rawList = text.slice(toIndex + 4).trim();
   } else {
-    // No "to" keyword — treat last whitespace-delimited token as the list name
+    // No "to" keyword — treat last whitespace-delimited token as the list name.
+    // If there's only one token, use it as the item; the webhook will route to "unspecified".
     const parts = text.split(/\s+/);
     if (parts.length < 2) {
-      return { success: false, error: 'Could not identify both an item and a list name' };
+      rawItem = text;
+      rawList = '__unspecified__'; // sentinel; webhook replaces with "unspecified"
+    } else {
+      rawList = parts[parts.length - 1];
+      rawItem = parts.slice(0, parts.length - 1).join(' ');
     }
-    rawList = parts[parts.length - 1];
-    rawItem = parts.slice(0, parts.length - 1).join(' ');
   }
 
   // Normalize whitespace
