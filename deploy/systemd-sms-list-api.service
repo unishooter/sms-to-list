@@ -1,0 +1,27 @@
+[Unit]
+Description=SMS List API (Express)
+Documentation=https://github.com/unishooter/sms-to-list
+After=network.target
+
+[Service]
+Type=simple
+User=ec2-user
+Group=ec2-user
+
+WorkingDirectory=/srv/sms-list-app/backend
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=sms-list-api
+
+# Load environment variables from the project .env file
+EnvironmentFile=/srv/sms-list-app/.env
+
+# Limit blast radius
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
