@@ -310,6 +310,103 @@ ul { list-style: none; }
 .login-card p { color: var(--text-muted); margin-bottom: 28px; font-size: 14px; }
 .login-card .google-wrap { display: flex; justify-content: center; }
 
+/* ── List status chip (inline next to title) ────────────────────── */
+.list-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.list-status-chip {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 2px 10px;
+  border-radius: 99px;
+}
+
+.list-status-chip.shopped { background: #dcfce7; color: #15803d; }
+.list-status-chip.closed  { background: #f1f5f9; color: #475569; }
+
+/* ── List status action buttons ─────────────────────────────────── */
+.btn-status {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+}
+
+.btn-status.shopped:hover { background: #dcfce7; border-color: #86efac; color: #15803d; }
+.btn-status.closed:hover  { background: #f1f5f9; border-color: #cbd5e1; color: #475569; }
+
+/* ── Sidebar closed-list styles ─────────────────────────────────── */
+.sidebar-divider {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 10px 8px 4px;
+  margin-top: 6px;
+  border-top: 1px solid var(--border);
+}
+
+.list-btn--shopped { opacity: 0.7; }
+.list-btn--closed  { opacity: 0.55; }
+
+.list-status-icon {
+  margin-right: 4px;
+  font-size: 11px;
+}
+
+.list-btn-label {
+  display: flex;
+  align-items: center;
+}
+
+/* ── Print button ───────────────────────────────────────────────── */
+.btn-sm-icon {
+  padding: 5px 10px;
+  font-size: 13px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+}
+.btn-sm-icon:hover { background: var(--border); color: var(--text); }
+
+/* ── Print styles ───────────────────────────────────────────────── */
+.print-only { display: none; }
+
+.print-header h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.print-header p  { font-size: 13px; color: #666; margin-bottom: 16px; }
+
+@media print {
+  .no-print  { display: none !important; }
+  .print-only { display: block !important; }
+
+  body { background: #fff; font-size: 12pt; }
+
+  .app       { display: block; height: auto; }
+  .app-body  { display: block; }
+
+  .main-content {
+    padding: 0;
+    overflow: visible;
+  }
+
+  .item-row {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    margin-bottom: 4px;
+    break-inside: avoid;
+  }
+
+  .item-row.done    { opacity: 1; }
+  .item-row.skipped { opacity: 1; }
+}
+
 /* ── Responsive ─────────────────────────────────────────────────── */
 @media (max-width: 600px) {
   .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); max-height: 160px; }

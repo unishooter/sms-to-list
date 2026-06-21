@@ -77,14 +77,27 @@ router.post('/sms', (req, res) => {
 
   const smsRow = insertSms.run([MessageSid || null, From || null, To || null, Body || null, 'ok', null]);
 
-  // Upsert list
-  db.prepare(`
-    INSERT INTO lists (name, display_name, updated_at)
-    VALUES (?, ?, CURRENT_TIMESTAMP)
-    ON CONFLICT(name) DO UPDATE SET updated_at = CURRENT_TIMESTAMP
-  `).run([parsed.listName, parsed.displayListName]);
+  // If a list with this name already exists but is closed, start a fresh one
+  const CLOSED_STATUSES = ['shopped', 'closed', 'archived'];
+  const existing = db.prepare('SELECT id, status FROM lists WHERE name = ?').get([parsed.listName]);
 
-  const list = db.prepare('SELECT id FROM lists WHERE name = ?').get([parsed.listName]);
+  let listName = parsed.listName;
+  if (existing && CLOSED_STATUSES.includes(existing.status)) {
+    // Create a new list with a unique name (timestamp suffix), same display name
+    listName = `${parsed.listName}_${Date.now()}`;
+    db.prepare(`
+      INSERT INTO lists (name, display_name, updated_at)
+      VALUES (?, ?, CURRENT_TIMESTAMP)
+    `).run([listName, parsed.displayListName]);
+  } else {
+    db.prepare(`
+      INSERT INTO lists (name, display_name, updated_at)
+      VALUES (?, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT(name) DO UPDATE SET updated_at = CURRENT_TIMESTAMP
+    `).run([parsed.listName, parsed.displayListName]);
+  }
+
+  const list = db.prepare('SELECT id FROM lists WHERE name = ?').get([listName]);
 
   db.prepare(`
     INSERT INTO list_items (list_id, item_name, status, source_sms_message_id, updated_at)

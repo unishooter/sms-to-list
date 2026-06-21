@@ -7,6 +7,7 @@ import { getLists, getListItems, updateItemStatus, updateListStatus } from './ap
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 const FILTERS = ['open', 'done', 'skipped', 'all'];
+const CLOSED_STATUSES = ['shopped', 'closed', 'archived'];
 
 function AppContent() {
   const [credential, setCredential] = useState(
@@ -19,7 +20,6 @@ function AppContent() {
   const [loading, setLoading]           = useState(false);
   const [error, setError]               = useState(null);
 
-  // Listen for token expiry events dispatched by api.js
   useEffect(() => {
     const onExpiry = () => setCredential(null);
     window.addEventListener('auth:expired', onExpiry);
@@ -30,7 +30,8 @@ function AppContent() {
     try {
       setError(null);
       const data = await getLists();
-      setLists(data.filter((l) => l.status === 'active'));
+      // Show all non-archived lists in the sidebar
+      setLists(data.filter((l) => l.status !== 'archived'));
     } catch (e) {
       setError(e.message);
     }
@@ -48,12 +49,10 @@ function AppContent() {
     }
   }, []);
 
-  // Load lists on mount (once authenticated)
   useEffect(() => {
     if (credential || !GOOGLE_CLIENT_ID) fetchLists();
   }, [credential, fetchLists]);
 
-  // Load items when selected list changes
   useEffect(() => {
     if (selectedList) fetchItems(selectedList.id);
   }, [selectedList, fetchItems]);
@@ -62,27 +61,21 @@ function AppContent() {
     try {
       const updated = await updateItemStatus(itemId, status);
       setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
-      // Refresh open_count in sidebar
-      setLists((prev) =>
-        prev.map((l) =>
-          l.id === selectedList?.id
-            ? { ...l, open_count: prev.find((x) => x.id === l.id)?.open_count }
-            : l
-        )
-      );
-      fetchLists(); // keep badge counts accurate
+      fetchLists();
     } catch (e) {
       setError(e.message);
     }
   };
 
-  const handleArchive = async (listId) => {
+  const handleListStatus = async (listId, status) => {
     try {
-      await updateListStatus(listId, 'archived');
-      setLists((prev) => prev.filter((l) => l.id !== listId));
-      if (selectedList?.id === listId) {
-        setSelectedList(null);
-        setItems([]);
+      const updated = await updateListStatus(listId, status);
+      if (status === 'archived') {
+        setLists((prev) => prev.filter((l) => l.id !== listId));
+        if (selectedList?.id === listId) { setSelectedList(null); setItems([]); }
+      } else {
+        setLists((prev) => prev.map((l) => (l.id === updated.id ? { ...l, status: updated.status } : l)));
+        if (selectedList?.id === listId) setSelectedList((prev) => ({ ...prev, status: updated.status }));
       }
     } catch (e) {
       setError(e.message);
@@ -102,7 +95,10 @@ function AppContent() {
     setItems([]);
   };
 
-  // Show login page if Google auth is configured and user is not signed in
+  const handlePrint = () => {
+    window.print();
+  };
+
   if (GOOGLE_CLIENT_ID && !credential) {
     return <Login onSuccess={setCredential} />;
   }
@@ -110,24 +106,22 @@ function AppContent() {
   const filteredItems =
     filter === 'all' ? items : items.filter((i) => i.status === filter);
 
+  const isClosed = selectedList && CLOSED_STATUSES.includes(selectedList.status);
+
   return (
     <div className="app">
-      <header className="app-header">
+      <header className="app-header no-print">
         <h1>🛒 Shopping Lists</h1>
         <div className="header-actions">
-          <button className="btn btn-ghost" onClick={handleRefresh}>
-            ↻ Refresh
-          </button>
+          <button className="btn btn-ghost" onClick={handleRefresh}>↻ Refresh</button>
           {GOOGLE_CLIENT_ID && credential && (
-            <button className="btn btn-ghost" onClick={handleLogout}>
-              Sign out
-            </button>
+            <button className="btn btn-ghost" onClick={handleLogout}>Sign out</button>
           )}
         </div>
       </header>
 
       {error && (
-        <div className="error-banner">
+        <div className="error-banner no-print">
           <span>{error}</span>
           <button onClick={() => setError(null)} aria-label="Dismiss">✕</button>
         </div>
@@ -137,22 +131,26 @@ function AppContent() {
         <ListView
           lists={lists}
           selectedList={selectedList}
-          onSelect={(list) => {
-            setSelectedList(list);
-            setFilter('open');
-          }}
+          onSelect={(list) => { setSelectedList(list); setFilter('open'); }}
         />
 
         <main className="main-content">
           {!selectedList ? (
-            <div className="empty-state center">
+            <div className="empty-state center no-print">
               <span>← Select a list to view items</span>
             </div>
           ) : (
             <>
               <div className="list-header">
-                <h2>{selectedList.display_name}</h2>
-                <div className="list-actions">
+                <div className="list-title-row">
+                  <h2>{selectedList.display_name}</h2>
+                  {isClosed && (
+                    <span className={`list-status-chip ${selectedList.status}`}>
+                      {selectedList.status}
+                    </span>
+                  )}
+                </div>
+                <div className="list-actions no-print">
                   <div className="filter-tabs">
                     {FILTERS.map((f) => (
                       <button
@@ -164,13 +162,48 @@ function AppContent() {
                       </button>
                     ))}
                   </div>
-                  <button
-                    className="btn btn-danger-ghost"
-                    onClick={() => handleArchive(selectedList.id)}
-                  >
-                    Archive
+                  <button className="btn btn-ghost btn-sm-icon" onClick={handlePrint} title="Print list">
+                    🖨 Print
                   </button>
+                  {!isClosed && (
+                    <button
+                      className="btn btn-status shopped"
+                      onClick={() => handleListStatus(selectedList.id, 'shopped')}
+                    >
+                      Shopped
+                    </button>
+                  )}
+                  {!isClosed && (
+                    <button
+                      className="btn btn-status closed"
+                      onClick={() => handleListStatus(selectedList.id, 'closed')}
+                    >
+                      Close
+                    </button>
+                  )}
+                  {selectedList.status !== 'archived' && (
+                    <button
+                      className="btn btn-danger-ghost"
+                      onClick={() => handleListStatus(selectedList.id, 'archived')}
+                    >
+                      Archive
+                    </button>
+                  )}
+                  {isClosed && (
+                    <button
+                      className="btn btn-ghost"
+                      onClick={() => handleListStatus(selectedList.id, 'active')}
+                    >
+                      Reopen
+                    </button>
+                  )}
                 </div>
+              </div>
+
+              {/* Print header — only visible when printing */}
+              <div className="print-only print-header">
+                <h2>{selectedList.display_name}</h2>
+                <p>{new Date().toLocaleDateString()}</p>
               </div>
 
               {loading ? (
@@ -186,6 +219,7 @@ function AppContent() {
                       key={item.id}
                       item={item}
                       onStatusChange={handleStatusChange}
+                      readonly={isClosed}
                     />
                   ))}
                 </ul>

@@ -58,7 +58,7 @@ router.patch('/items/:id/status', (req, res) => {
 // PATCH /api/lists/:id/status
 router.patch('/lists/:id/status', (req, res) => {
   const { status } = req.body;
-  const valid = ['active', 'archived'];
+  const valid = ['active', 'shopped', 'closed', 'archived'];
   if (!valid.includes(status)) {
     return res.status(400).json({ error: `status must be one of: ${valid.join(', ')}` });
   }
