@@ -64,7 +64,7 @@ function AppContent() {
     const id = setInterval(() => {
       fetchLists();
       if (selectedList) fetchItems(selectedList.id);
-    }, 30000);
+    }, 10000);
     return () => clearInterval(id);
   }, [credential, selectedList, fetchLists, fetchItems]);
 
