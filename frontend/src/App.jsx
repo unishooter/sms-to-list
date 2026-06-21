@@ -64,13 +64,12 @@ function AppContent() {
 
   // Auto-refresh every 30 seconds — stable interval, reads list via ref
   useEffect(() => {
-    if (!credential && GOOGLE_CLIENT_ID) return;
     const id = setInterval(() => {
       fetchLists();
       if (selectedListRef.current) fetchItems(selectedListRef.current.id);
     }, 30000);
     return () => clearInterval(id);
-  }, [credential, fetchLists, fetchItems]);
+  }, [fetchLists, fetchItems]);
 
   const handleStatusChange = async (itemId, status) => {
     try {
