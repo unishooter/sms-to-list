@@ -54,3 +54,18 @@ export const moveItem = (itemId, listId) =>
     method: 'PATCH',
     body: JSON.stringify({ listId }),
   });
+
+export const createList = (display_name) =>
+  request('/lists', {
+    method: 'POST',
+    body: JSON.stringify({ display_name }),
+  });
+
+export const renameList = (listId, display_name) =>
+  request(`/lists/${listId}/name`, {
+    method: 'PATCH',
+    body: JSON.stringify({ display_name }),
+  });
+
+export const deleteList = (listId) =>
+  request(`/lists/${listId}`, { method: 'DELETE' });

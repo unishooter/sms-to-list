@@ -365,6 +365,60 @@ ul { list-style: none; }
   align-items: center;
 }
 
+/* ── Editable list title ────────────────────────────────────────── */
+.editable-title { cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.editable-title:hover .edit-icon { opacity: 1; }
+.edit-icon { font-size: 14px; opacity: 0; color: var(--text-muted); transition: opacity 0.15s; }
+.editable-title-input {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  border: none;
+  border-bottom: 2px solid var(--primary);
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  width: 260px;
+}
+
+/* ── New list form in sidebar ───────────────────────────────────── */
+.new-list-btn {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  text-align: left;
+  font-size: 13px;
+  color: var(--text-muted);
+  border: 1px dashed var(--border);
+  transition: background 0.12s, color 0.12s;
+}
+.new-list-btn:hover { background: var(--bg); color: var(--primary); border-color: var(--primary); }
+
+.new-list-form { padding: 6px 4px; }
+.new-list-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+  margin-bottom: 6px;
+}
+.new-list-input:focus { border-color: var(--primary); }
+.new-list-actions { display: flex; gap: 6px; }
+.btn-sm-text { padding: 4px 10px; font-size: 12px; }
+
+/* ── Item from number ───────────────────────────────────────────── */
+.item-from {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 /* ── Drag and drop ──────────────────────────────────────────────── */
 .item-row[draggable="true"] { cursor: grab; }
 .item-row[draggable="true"]:active { cursor: grabbing; }

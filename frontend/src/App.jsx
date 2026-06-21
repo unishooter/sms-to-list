@@ -3,11 +3,44 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import Login from './components/Login.jsx';
 import ListView from './components/ListView.jsx';
 import ItemRow from './components/ItemRow.jsx';
-import { getLists, getListItems, updateItemStatus, updateListStatus, moveItem } from './api.js';
+import { getLists, getListItems, updateItemStatus, updateListStatus, moveItem, createList, renameList, deleteList } from './api.js';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 const FILTERS = ['open', 'done', 'skipped', 'all'];
 const CLOSED_STATUSES = ['shopped', 'closed', 'archived'];
+
+function EditableTitle({ value, onSave }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+
+  const commit = () => {
+    setEditing(false);
+    if (draft.trim() && draft.trim() !== value) onSave(draft.trim());
+    else setDraft(value);
+  };
+
+  if (editing) {
+    return (
+      <input
+        className="editable-title-input"
+        value={draft}
+        autoFocus
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setDraft(value); setEditing(false); } }}
+      />
+    );
+  }
+  return (
+    <h2
+      className="editable-title"
+      onClick={() => { setDraft(value); setEditing(true); }}
+      title="Click to rename"
+    >
+      {value} <span className="edit-icon">✎</span>
+    </h2>
+  );
+}
 
 function AppContent() {
   const [credential, setCredential] = useState(
@@ -111,6 +144,39 @@ function AppContent() {
 
   const handlePrint = () => window.print();
 
+  const handleCreateList = async (displayName) => {
+    try {
+      const newList = await createList(displayName);
+      setLists((prev) => [newList, ...prev]);
+      setSelectedList(newList);
+      setFilter('open');
+      setItems([]);
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
+  const handleRenameList = async (listId, displayName) => {
+    try {
+      const updated = await renameList(listId, displayName);
+      setLists((prev) => prev.map((l) => (l.id === updated.id ? { ...l, display_name: updated.display_name } : l)));
+      if (selectedList?.id === updated.id) setSelectedList((prev) => ({ ...prev, display_name: updated.display_name }));
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
+  const handleDeleteList = async (listId) => {
+    if (!window.confirm('Delete this list and all its items? This cannot be undone.')) return;
+    try {
+      await deleteList(listId);
+      setLists((prev) => prev.filter((l) => l.id !== listId));
+      if (selectedList?.id === listId) { setSelectedList(null); setItems([]); }
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
   const handleDragStart = (itemId) => setDragItemId(itemId);
   const handleDragEnd   = ()       => setDragItemId(null);
 
@@ -163,6 +229,7 @@ function AppContent() {
           onSelect={(list) => { setSelectedList(list); setFilter('open'); }}
           dragging={dragItemId !== null}
           onDropList={handleDropOnList}
+          onCreateList={handleCreateList}
         />
 
         <main className="main-content">
@@ -174,7 +241,10 @@ function AppContent() {
             <>
               <div className="list-header">
                 <div className="list-title-row">
-                  <h2>{selectedList.display_name}</h2>
+                  <EditableTitle
+                    value={selectedList.display_name}
+                    onSave={(name) => handleRenameList(selectedList.id, name)}
+                  />
                   {isClosed && (
                     <span className={`list-status-chip ${selectedList.status}`}>
                       {selectedList.status}
@@ -220,6 +290,13 @@ function AppContent() {
                       Archive
                     </button>
                   )}
+                  <button
+                    className="btn btn-danger-ghost"
+                    onClick={() => handleDeleteList(selectedList.id)}
+                    title="Permanently delete list and items"
+                  >
+                    Delete
+                  </button>
                   {isClosed && (
                     <button
                       className="btn btn-ghost"
