@@ -58,6 +58,16 @@ function AppContent() {
     if (selectedList) fetchItems(selectedList.id);
   }, [selectedList, fetchItems]);
 
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    if (!credential && GOOGLE_CLIENT_ID) return;
+    const id = setInterval(() => {
+      fetchLists();
+      if (selectedList) fetchItems(selectedList.id);
+    }, 30000);
+    return () => clearInterval(id);
+  }, [credential, selectedList, fetchLists, fetchItems]);
+
   const handleStatusChange = async (itemId, status) => {
     try {
       const updated = await updateItemStatus(itemId, status);
