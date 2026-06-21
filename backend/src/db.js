@@ -18,6 +18,14 @@ function initDb() {
   const dir = path.dirname(DB_PATH);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
+  // node-sqlite3-wasm uses a .lock directory for locking; clean up stale locks
+  // left behind by a previous crash before opening the database.
+  const lockPath = DB_PATH + '.lock';
+  if (fs.existsSync(lockPath)) {
+    fs.rmdirSync(lockPath, { recursive: true });
+    console.log(`Removed stale lock: ${lockPath}`);
+  }
+
   db = new Database(DB_PATH);
 
   db.exec(CREATE_SMS_MESSAGES);
