@@ -11,10 +11,11 @@
   --green:       #22c55e;
   --amber:       #f59e0b;
   --slate:       #94a3b8;
-  --sidebar-w:   230px;
-  --header-h:    56px;
-  --radius:      8px;
-  --shadow:      0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+  --sidebar-w:      230px;
+  --right-panel-w:  300px;
+  --header-h:       56px;
+  --radius:         8px;
+  --shadow:         0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
 }
 
 /* ── Reset ──────────────────────────────────────────────────────── */
@@ -481,7 +482,238 @@ ul { list-style: none; }
   .item-row.skipped { opacity: 1; }
 }
 
+/* ── Right panel ────────────────────────────────────────────────── */
+.right-panel {
+  width: var(--right-panel-w);
+  flex-shrink: 0;
+  background: var(--bg);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  overflow-y: auto;
+}
+
+/* ── Widget card base ───────────────────────────────────────────── */
+.widget-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.widget-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.widget-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+  flex: 1;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.widget-header-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.widget-icon-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, color 0.12s;
+}
+.widget-icon-btn:hover { background: var(--border); color: var(--text); }
+
+.widget-loading { color: var(--text-muted); font-size: 13px; }
+.widget-muted   { color: var(--text-muted); font-size: 13px; line-height: 1.5; }
+.widget-error   { color: #991b1b; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 6px 10px; font-size: 12px; }
+
+.widget-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  margin-top: 2px;
+}
+
+.widget-refresh-btn {
+  font-size: 14px;
+  color: var(--text-muted);
+  padding: 0 4px;
+  border-radius: 4px;
+  transition: color 0.12s;
+}
+.widget-refresh-btn:hover { color: var(--primary); }
+
+/* ── Weather widget ─────────────────────────────────────────────── */
+.weather-current {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.weather-icon-lg { font-size: 36px; line-height: 1; }
+
+.weather-current-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.weather-temp {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.weather-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.weather-detail-row {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.weather-forecast {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+.forecast-day {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  gap: 6px;
+}
+
+.forecast-label {
+  width: 40px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.forecast-range {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ── Calendar widget ────────────────────────────────────────────── */
+.calendar-connect {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cal-event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cal-event-item {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: background 0.1s;
+}
+.cal-event-item:hover { background: var(--bg); }
+
+.cal-event-date {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.cal-event-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.cal-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px;
+}
+
+.cal-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+  background: var(--surface);
+  color: var(--text);
+}
+.cal-input:focus { border-color: var(--primary); }
+
+.cal-input-row {
+  display: flex;
+  gap: 6px;
+}
+.cal-input-row .cal-input { flex: 1; min-width: 0; }
+
+.cal-add-actions {
+  display: flex;
+  gap: 6px;
+}
+
 /* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .right-panel { display: none; }
+}
+
 @media (max-width: 600px) {
   .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); max-height: 160px; }
   .app-body { flex-direction: column; }

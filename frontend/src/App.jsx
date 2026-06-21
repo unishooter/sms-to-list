@@ -3,6 +3,8 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import Login from './components/Login.jsx';
 import ListView from './components/ListView.jsx';
 import ItemRow from './components/ItemRow.jsx';
+import WeatherWidget from './components/WeatherWidget.jsx';
+import CalendarWidget from './components/CalendarWidget.jsx';
 import { getLists, getListItems, updateItemStatus, updateListStatus, moveItem, createList, renameList, deleteList } from './api.js';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
@@ -206,7 +208,7 @@ function AppContent() {
   return (
     <div className="app">
       <header className="app-header no-print">
-        <h1>🛒 Shopping Lists</h1>
+        <h1>🏠 Family Dashboard</h1>
         <div className="header-actions">
           <button className="btn btn-ghost" onClick={handleRefresh}>↻ Refresh</button>
           {GOOGLE_CLIENT_ID && credential && (
@@ -232,7 +234,7 @@ function AppContent() {
           onCreateList={handleCreateList}
         />
 
-        <main className="main-content">
+        <main className="main-content" id="list-panel">
           {!selectedList ? (
             <div className="empty-state center no-print">
               <span>← Select a list to view items</span>
@@ -337,6 +339,11 @@ function AppContent() {
             </>
           )}
         </main>
+
+        <aside className="right-panel no-print">
+          <WeatherWidget />
+          <CalendarWidget />
+        </aside>
       </div>
     </div>
   );

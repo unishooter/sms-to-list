@@ -191,6 +191,37 @@ cp /srv/sms-list-app/backend/data/sms-list.sqlite \
 
 ---
 
+## 11. Google Calendar API Setup (for Calendar Widget)
+
+The Calendar widget uses the Google Calendar REST API directly from the browser (no backend involvement). You must enable the API and configure OAuth scopes.
+
+### 11a. Enable the Google Calendar API
+
+1. Go to [Google Cloud Console → APIs & Services → Library](https://console.cloud.google.com/apis/library)
+2. Search for **Google Calendar API**
+3. Click **Enable**
+
+### 11b. Add Calendar OAuth Scope to Consent Screen
+
+1. Go to [APIs & Services → OAuth consent screen](https://console.cloud.google.com/apis/credentials/consent)
+2. Click **Edit App**
+3. Under **Scopes**, click **Add or Remove Scopes**
+4. Add the scope: `https://www.googleapis.com/auth/calendar`
+5. Save
+
+> If your app is in **Testing** mode (not published), only users listed under "Test users" can authorize the Calendar scope. Add any family member emails there, or publish the app for internal use.
+
+### 11c. Using the Calendar Widget
+
+- On first use, click the **Connect Google Calendar** button in the right panel
+- A Google consent popup will appear asking for Calendar access
+- After approval, upcoming events from the primary calendar are shown
+- The **+** button opens a form to add events (title, date, optional time)
+- The access token expires after ~1 hour; click **Connect** again to refresh
+- The **✕** button disconnects the calendar
+
+---
+
 ## 11. AWS ALB Notes
 
 | Layer | Detail |

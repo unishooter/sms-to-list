@@ -9,7 +9,7 @@ NGINX_ROOT=/var/www/sms-list-app
 
 echo "==> Pulling latest code..."
 cd "$APP_DIR"
-git pull origin main
+git pull origin master
 
 echo "==> Installing backend dependencies..."
 cd "$APP_DIR/backend"
