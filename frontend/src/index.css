@@ -365,6 +365,26 @@ ul { list-style: none; }
   align-items: center;
 }
 
+/* ── Drag and drop ──────────────────────────────────────────────── */
+.item-row[draggable="true"] { cursor: grab; }
+.item-row[draggable="true"]:active { cursor: grabbing; }
+
+.list-btn.droppable  { outline: 2px dashed var(--border); outline-offset: -2px; }
+.list-btn.drop-target {
+  background: #eff6ff;
+  outline: 2px dashed var(--primary);
+  outline-offset: -2px;
+  color: var(--primary-dk);
+}
+
+.drag-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 8px 4px;
+  font-style: italic;
+}
+
 /* ── Print button ───────────────────────────────────────────────── */
 .btn-sm-icon {
   padding: 5px 10px;

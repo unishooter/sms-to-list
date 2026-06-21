@@ -77,6 +77,22 @@ router.post('/sms', (req, res) => {
 
   const smsRow = insertSms.run([MessageSid || null, From || null, To || null, Body || null, 'ok', null]);
 
+  // If no "to" keyword was used, verify the candidate list name exists.
+  // If it doesn't, treat the full body text as the item and route to "unspecified".
+  if (!parsed.hadToKeyword) {
+    const known = db.prepare('SELECT id FROM lists WHERE name = ?').get([parsed.listName]);
+    if (!known) {
+      // Reconstruct full item name from original body (strip leading "add")
+      const fullItem = Body.trim().replace(/^add\s+/i, '').trim();
+      parsed.itemName = fullItem
+        .split(' ')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ');
+      parsed.listName = 'unspecified';
+      parsed.displayListName = 'Unspecified';
+    }
+  }
+
   // If a list with this name already exists but is closed, start a fresh one
   const CLOSED_STATUSES = ['shopped', 'closed', 'archived'];
   const existing = db.prepare('SELECT id, status FROM lists WHERE name = ?').get([parsed.listName]);

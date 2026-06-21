@@ -48,3 +48,9 @@ export const updateListStatus = (listId, status) =>
     method: 'PATCH',
     body: JSON.stringify({ status }),
   });
+
+export const moveItem = (itemId, listId) =>
+  request(`/items/${itemId}/list`, {
+    method: 'PATCH',
+    body: JSON.stringify({ listId }),
+  });

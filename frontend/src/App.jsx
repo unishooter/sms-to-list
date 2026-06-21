@@ -3,7 +3,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import Login from './components/Login.jsx';
 import ListView from './components/ListView.jsx';
 import ItemRow from './components/ItemRow.jsx';
-import { getLists, getListItems, updateItemStatus, updateListStatus } from './api.js';
+import { getLists, getListItems, updateItemStatus, updateListStatus, moveItem } from './api.js';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 const FILTERS = ['open', 'done', 'skipped', 'all'];
@@ -19,6 +19,7 @@ function AppContent() {
   const [filter, setFilter]             = useState('open');
   const [loading, setLoading]           = useState(false);
   const [error, setError]               = useState(null);
+  const [dragItemId, setDragItemId]     = useState(null);
 
   useEffect(() => {
     const onExpiry = () => setCredential(null);
@@ -95,8 +96,23 @@ function AppContent() {
     setItems([]);
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handlePrint = () => window.print();
+
+  const handleDragStart = (itemId) => setDragItemId(itemId);
+  const handleDragEnd   = ()       => setDragItemId(null);
+
+  const handleDropOnList = async (targetListId) => {
+    if (!dragItemId || targetListId === selectedList?.id) return;
+    try {
+      await moveItem(dragItemId, targetListId);
+      // Remove item from current view
+      setItems((prev) => prev.filter((i) => i.id !== dragItemId));
+      fetchLists(); // refresh open counts
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setDragItemId(null);
+    }
   };
 
   if (GOOGLE_CLIENT_ID && !credential) {
@@ -132,6 +148,8 @@ function AppContent() {
           lists={lists}
           selectedList={selectedList}
           onSelect={(list) => { setSelectedList(list); setFilter('open'); }}
+          dragging={dragItemId !== null}
+          onDropList={handleDropOnList}
         />
 
         <main className="main-content">
@@ -220,6 +238,8 @@ function AppContent() {
                       item={item}
                       onStatusChange={handleStatusChange}
                       readonly={isClosed}
+                      onDragStart={handleDragStart}
+                      onDragEnd={handleDragEnd}
                     />
                   ))}
                 </ul>

@@ -55,6 +55,23 @@ router.patch('/items/:id/status', (req, res) => {
   res.json(db.prepare('SELECT * FROM list_items WHERE id = ?').get([req.params.id]));
 });
 
+// PATCH /api/items/:id/list  — move item to a different list
+router.patch('/items/:id/list', (req, res) => {
+  const { listId } = req.body;
+  if (!listId) return res.status(400).json({ error: 'listId is required' });
+
+  const db = getDb();
+  const list = db.prepare('SELECT id FROM lists WHERE id = ?').get([listId]);
+  if (!list) return res.status(404).json({ error: 'Target list not found' });
+
+  const result = db.prepare(`
+    UPDATE list_items SET list_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
+  `).run([listId, req.params.id]);
+
+  if (result.changes === 0) return res.status(404).json({ error: 'Item not found' });
+  res.json(db.prepare('SELECT * FROM list_items WHERE id = ?').get([req.params.id]));
+});
+
 // PATCH /api/lists/:id/status
 router.patch('/lists/:id/status', (req, res) => {
   const { status } = req.body;

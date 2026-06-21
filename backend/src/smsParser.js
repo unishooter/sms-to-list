@@ -48,6 +48,7 @@ function parseMessage(body) {
     itemName: toTitleCase(rawItem),
     listName: rawList.toLowerCase(),       // stored key
     displayListName: toTitleCase(rawList), // UI label
+    hadToKeyword: toIndex !== -1,
   };
 }
 

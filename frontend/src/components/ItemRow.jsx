@@ -1,10 +1,15 @@
 import StatusBadge from './StatusBadge.jsx';
 
-export default function ItemRow({ item, onStatusChange, readonly = false }) {
+export default function ItemRow({ item, onStatusChange, readonly = false, onDragStart, onDragEnd }) {
   const { id, item_name, status } = item;
 
   return (
-    <li className={`item-row ${status}`}>
+    <li
+      className={`item-row ${status}`}
+      draggable={!readonly}
+      onDragStart={() => onDragStart?.(id)}
+      onDragEnd={() => onDragEnd?.()}
+    >
       <span className="item-name">{item_name}</span>
       <StatusBadge status={status} />
       {!readonly && (
