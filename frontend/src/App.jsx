@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import Login from './components/Login.jsx';
 import ListView from './components/ListView.jsx';
@@ -20,6 +20,7 @@ function AppContent() {
   const [loading, setLoading]           = useState(false);
   const [error, setError]               = useState(null);
   const [dragItemId, setDragItemId]     = useState(null);
+  const selectedListRef = useRef(selectedList);
 
   useEffect(() => {
     const onExpiry = () => setCredential(null);
@@ -58,15 +59,18 @@ function AppContent() {
     if (selectedList) fetchItems(selectedList.id);
   }, [selectedList, fetchItems]);
 
-  // Auto-refresh every 30 seconds
+  // Keep ref in sync so the interval always sees the current selected list
+  useEffect(() => { selectedListRef.current = selectedList; }, [selectedList]);
+
+  // Auto-refresh every 30 seconds — stable interval, reads list via ref
   useEffect(() => {
     if (!credential && GOOGLE_CLIENT_ID) return;
     const id = setInterval(() => {
       fetchLists();
-      if (selectedList) fetchItems(selectedList.id);
-    }, 10000);
+      if (selectedListRef.current) fetchItems(selectedListRef.current.id);
+    }, 30000);
     return () => clearInterval(id);
-  }, [credential, selectedList, fetchLists, fetchItems]);
+  }, [credential, fetchLists, fetchItems]);
 
   const handleStatusChange = async (itemId, status) => {
     try {
